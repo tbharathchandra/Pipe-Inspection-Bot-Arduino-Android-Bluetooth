@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Pipe Inspection Bot</string>
+    <string name="status">status</string>
+    <string name="data_from_arduino">Data from arduino</string>
+    <string name="start_inspection"> Start inspection </string>
+    <string name="data">data</string>
+</resources>
