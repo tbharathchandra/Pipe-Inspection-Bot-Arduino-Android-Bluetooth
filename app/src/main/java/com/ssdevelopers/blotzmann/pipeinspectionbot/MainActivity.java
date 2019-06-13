@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -16,12 +17,20 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.UUID;
+
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +49,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView data8;
     private TextView data9;
     private Boolean check;
+
+    private String csvFile = "myData.xls";
+    private File directory;
+    WritableWorkbook workbook;
+    WritableSheet sheet;
 
     private BluetoothAdapter madapter;
     private static final int REQUEST_ENABLE_BT=1;
@@ -93,6 +107,48 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 connectThread.cancel();
                 connectedThread.cancel();
+                File sd = Environment.getExternalStorageDirectory();
+                directory= new File(sd.getAbsolutePath());
+                if (!directory.isDirectory()) {
+                    directory.mkdirs();
+                }
+                try{
+                    File file = new File(directory,csvFile);
+                    WorkbookSettings wbSettings = new WorkbookSettings();
+                    wbSettings.setLocale(new Locale("en", "EN"));
+                    workbook = Workbook.createWorkbook(file, wbSettings);
+                    sheet = workbook.createSheet("bot data", 0);
+                    sheet.addCell(new Label(0, 0, "sensor1"));
+                    sheet.addCell(new Label(1, 0, "sensor2"));
+                    sheet.addCell(new Label(2, 0, "sensor3"));
+                    sheet.addCell(new Label(3, 0, "sensor4"));
+                    sheet.addCell(new Label(4, 0, "sensor5"));
+                    sheet.addCell(new Label(5, 0, "sensor6"));
+                    sheet.addCell(new Label(6, 0, "sensor7"));
+                    sheet.addCell(new Label(7, 0, "sensor8"));
+                    sheet.addCell(new Label(8, 0, "sensor9"));
+                    sheet.addCell(new Label(9, 0, "distance travelled"));
+
+                    for(int i=0;i<datalist1.size();i++){
+                        sheet.addCell(new Label(0,i+1,datalist1.get(i).toString()));
+                        sheet.addCell(new Label(1,i+1,datalist2.get(i).toString()));
+                        sheet.addCell(new Label(2,i+1,datalist3.get(i).toString()));
+                        sheet.addCell(new Label(3,i+1,datalist4.get(i).toString()));
+                        sheet.addCell(new Label(4,i+1,datalist5.get(i).toString()));
+                        sheet.addCell(new Label(5,i+1,datalist6.get(i).toString()));
+                        sheet.addCell(new Label(6,i+1,datalist7.get(i).toString()));
+                        sheet.addCell(new Label(7,i+1,datalist8.get(i).toString()));
+                        sheet.addCell(new Label(8,i+1,datalist9.get(i).toString()));
+                        sheet.addCell(new Label(9,i+1,distance.get(i).toString()));
+                    }
+                    workbook.write();
+                    workbook.close();
+                    Toast.makeText(MainActivity.this,"Data exported in a excel file",Toast.LENGTH_LONG).show();
+
+                }catch (Exception e){
+                    Log.i("insideListener","insideListener");
+                    e.printStackTrace();
+                }
                 Intent i =new Intent(MainActivity.this,Results.class);
                 Bundle b =new Bundle();
                 b.putSerializable("DataList1",datalist1);
@@ -109,11 +165,9 @@ public class MainActivity extends AppCompatActivity {
                 i.putExtra("data",b);
                 startActivity(i);
 
-
-
-
             }
         });
+
     }
 
     @Override
